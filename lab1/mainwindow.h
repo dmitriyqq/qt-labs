@@ -6,6 +6,7 @@
 #include <QTextEdit>
 #include <QGridLayout>
 #include <QPushButton>
+#include <QVector>
 
 #include "Calculator.h"
 

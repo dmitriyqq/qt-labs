@@ -12,8 +12,6 @@ class Calculator : public QObject {
         QString _currentExpression = "";
         QString _currentResult = "0";
 
-        QVector<QPair<QString, QString>> _history;
-
         void _updateCurrentResult() {
             if (_currentExpression.isEmpty()) {
                 // hardcoded zero if empty, without this expression will be undefined
