@@ -7,13 +7,10 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setFixedSize(800, 600);
     setWindowTitle("calc");
-
-    ui->setupUi(this);
 
     centralWidget = new QWidget();
     setCentralWidget(centralWidget);
@@ -105,8 +102,6 @@ MainWindow::~MainWindow()
 
     delete input;
     delete output;
-
-    delete ui;
 }
 
 void MainWindow::handleButton()

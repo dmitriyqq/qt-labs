@@ -9,10 +9,6 @@
 
 #include "Calculator.h"
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -35,12 +31,11 @@ private:
     Calculator calculator;
     QVector<QPushButton*> buttonWidgets;
 
-    Ui::MainWindow *ui;
-
     QTextEdit* input;
     QLabel* output;
     QWidget* centralWidget;
     QGridLayout* layout;
 
 };
+
 #endif // MAINWINDOW_H
