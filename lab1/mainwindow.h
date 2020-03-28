@@ -3,6 +3,11 @@
 
 #include <QMainWindow>
 #include <QLabel>
+#include <QTextEdit>
+#include <QGridLayout>
+#include <QPushButton>
+
+#include "Calculator.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -14,15 +19,28 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    virtual ~MainWindow();
+
+signals:
+    void inputRecieved(const QString&);
+    void newExpressionRecieved(const QString&);
 
 private slots:
     void handleButton();
+    void handleTextEdit();
+    void highlightOutput();
+    void resetOutput();
 
 private:
+    Calculator calculator;
+    QVector<QPushButton*> buttonWidgets;
+
     Ui::MainWindow *ui;
-    double accumulator = 0.0;
-    QString operation;
-    QLabel* label;
+
+    QTextEdit* input;
+    QLabel* output;
+    QWidget* centralWidget;
+    QGridLayout* layout;
+
 };
 #endif // MAINWINDOW_H

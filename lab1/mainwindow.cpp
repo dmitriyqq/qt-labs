@@ -3,103 +3,140 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <QLabel>
-#include <vector>
-#include <QDebug>
-#include <cmath>
+#include <QSet>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    setFixedSize(800, 600);
+    setWindowTitle("calc");
+
     ui->setupUi(this);
 
-    auto main_widget = new QWidget();
-    setCentralWidget(main_widget);
+    centralWidget = new QWidget();
+    setCentralWidget(centralWidget);
 
-    auto layout = new QGridLayout();
+    layout = new QGridLayout();
 
-    std::vector<QString> buttons = { "%", "CE", "C", "DEL",  "1/x", "x^2", "sqrt", "/", "7", "8", "9", "*", "4", "5", "6", "-", "1", "2", "3", "+", "+/-", "0", ".", "="};
+    QVector<QString> buttons = {
+        "(", ")", "⌫", "/",
+        "7", "8", "9", "*",
+        "4", "5", "6", "-",
+        "1", "2", "3", "+",
+        "C",  "0", ".", "="
+    };
 
-    label = new QLabel();
+    QSet<QString> highlightedButtons = {
+        "(", ")", "⌫", "/", "C",
+        "*", "-",  "+", ".", "="
+    };
 
-    layout->addWidget(label, 0, 0, 1, 4);
-    label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    output = new QLabel();
+    input = new QTextEdit();
 
-    QFont font = label->font();
-    font.setPointSize(32);
-    label->setFont(font);
-    label->setAlignment(Qt::AlignCenter | Qt::AlignRight);
+    layout->addWidget(input, 0, 0, 1, 4);
+    layout->addWidget(output, 1, 0, 1, 4);
 
-    int row = 1;
+    input->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    output->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    output->setAlignment(Qt::AlignCenter | Qt::AlignRight);
+    output->setText(calculator.getResult());
+
+    int row = 2;
     int col = 0;
+
+    constexpr int NUMBER_COLUMNS = 4;
+
     for(const auto &text : buttons)
     {
-        auto button = new QPushButton(text);
-        button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        layout->addWidget(button, row, col);
+        if (text.length()) {
+            auto button = new QPushButton(text);
+            button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-        connect(button, SIGNAL (released()), this, SLOT (handleButton()));
+            if (highlightedButtons.find(text) != highlightedButtons.end()) {
+                button->setStyleSheet("color: orange;");
+            }
+            layout->addWidget(button, row, col);
+
+            connect(button, &QPushButton::released, this, &MainWindow::handleButton);
+            buttonWidgets.push_back(button);
+        }
 
         col++;
-        if (col > 3) {
+        if (col > NUMBER_COLUMNS - 1) {
             col = 0;
             row++;
         }
     }
 
-    main_widget->setLayout(layout);
+    connect(input, &QTextEdit::textChanged, this, &MainWindow::handleTextEdit);
+    connect(&calculator, &Calculator::resultChanged, output, &QLabel::setText);
+    connect(this, &MainWindow::inputRecieved, &calculator, &Calculator::handleInput);
+    connect(this, &MainWindow::newExpressionRecieved, &calculator, &Calculator::changeExpression);
+
+    centralWidget->setLayout(layout);
+}
+
+void MainWindow::highlightOutput() {
+    output->setStyleSheet("color: orange; font-size: 64px");
+}
+
+void MainWindow::resetOutput() {
+    output->setStyleSheet("color: black; font-size: 48px");
 }
 
 MainWindow::~MainWindow()
 {
+    disconnect(input, &QTextEdit::textChanged, this, &MainWindow::handleTextEdit);
+    disconnect(&calculator, &Calculator::resultChanged, output, &QLabel::setText);
+    disconnect(this, &MainWindow::inputRecieved, &calculator, &Calculator::handleInput);
+    disconnect(this, &MainWindow::newExpressionRecieved, &calculator, &Calculator::changeExpression);
+
+    delete centralWidget;
+    delete layout;
+
+    for (auto button : buttonWidgets) {
+       disconnect(button, &QPushButton::released, this, &MainWindow::handleButton);
+       delete button;
+    }
+
+    delete input;
+    delete output;
+
     delete ui;
 }
 
 void MainWindow::handleButton()
 {
+    resetOutput();
+
     QObject *senderObj = sender();
     QPushButton *senderButton = (QPushButton*) senderObj;
-    qDebug() << "Pushed button: " << senderButton->text();
 
-    auto b = senderButton->text();
+    // special buttons
+    if (senderButton->text() == "C") {
+        input->clear();
+    } else if (senderButton->text() == "=") {
+        highlightOutput();
+    } else if (senderButton->text() == "⌫") {
+        input->setText(input->toPlainText().remove(-1, 1));
+    } else {
+        // notify calculator
+        emit inputRecieved(senderButton->text());
 
-    if (b == "+" || b == "/" || b == "-" || b == "*") {
-        accumulator = label->text().toDouble();
-        label->setText("");
-        operation = b;
-    } else if (b == "="){
-        auto operB = label->text().toDouble();
-        if (operation == "+") {
-            label->setText(QString::number(operB + accumulator));
-        } else if (operation == "-") {
-            label->setText(QString::number(accumulator - operB));
-        } else if (operation == "/") {
-            if (operB != 0) {
-                label->setText(QString::number(operB / accumulator));
-            }
-        } else if (operation == "*") {
-            label->setText(QString::number(operB * accumulator));
-        }
-    } else if (b == "CE" || b == "C") {
-        label->setText("");
-    } else if (b == "x^2") {
-        auto t = label->text().toDouble();
-        label->setText(QString::number(t * t));
-    } else if (b == "1/x") {
-        auto t = label->text().toDouble();
-        label->setText(QString::number(t / t));
-    } else if (b == "sqrt") {
-        auto t = label->text().toDouble();
-        label->setText(QString::number(std::sqrt(t)));
-    } else if (b == "DEL") {
-        auto t = label->text();
-        label->setText(t.remove(t.size() - 1, 1));
+        // maintain text input value
+        input->setText(calculator.getExpression());
     }
-    else if (b == "0" && label->text() == "") {
+}
 
-    } else
-    {
-        label->setText(label->text() + b);
-    }
+void MainWindow::handleTextEdit()
+{
+    resetOutput();
+    QObject *senderObj = sender();
+    QTextEdit *senderTextEdit = (QTextEdit*) senderObj;
 
+    emit newExpressionRecieved(senderTextEdit->toPlainText());
 }
