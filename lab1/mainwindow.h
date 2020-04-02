@@ -25,10 +25,10 @@ signals:
 private slots:
     void handleButton();
     void handleTextEdit();
+private:
     void highlightOutput();
     void resetOutput();
 
-private:
     Calculator calculator;
     QVector<QPushButton*> buttonWidgets;
 
