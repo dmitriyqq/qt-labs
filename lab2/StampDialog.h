@@ -65,7 +65,7 @@ public:
         numberIssuedEdit = new QLineEdit();
         imageButton = new QPushButton("Загрузить изображение");
 
-        fileDialog = new QFileDialog(this, "Выберете изображение", QStandardPaths::writableLocation(QStandardPaths::PicturesLocation), "*.jpg;*.jpeg;*.png;*.jfif");
+        fileDialog = new QFileDialog(this, "Выберете изображение", QStandardPaths::writableLocation(QStandardPaths::PicturesLocation), "Images(*.jpg *.jpeg *.png *.jfif)");
         fileDialog->setFileMode(QFileDialog::FileMode::ExistingFile);
         fileDialog->setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
 
