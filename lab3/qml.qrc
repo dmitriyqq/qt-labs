@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>StampItemDelegate.qml</file>
+        <file>AddStampDialog.qml</file>
+        <file>StampEditDialog.qml</file>
+    </qresource>
+</RCC>

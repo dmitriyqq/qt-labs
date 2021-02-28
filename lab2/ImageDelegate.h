@@ -8,6 +8,7 @@
 #include <QPixmap>
 #include <QLabel>
 #include <QPainter>
+#include <QAbstractItemDelegate>
 
 class ImageDelegate : public QAbstractItemDelegate {
 Q_OBJECT

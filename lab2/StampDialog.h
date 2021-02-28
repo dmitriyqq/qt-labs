@@ -12,6 +12,7 @@
 #include <QtWidgets/QFileDialog>
 #include <QtCore/QStandardPaths>
 #include <QUuid>
+#include <QDebug>
 
 class StampDialog : public QDialog {
     Q_OBJECT

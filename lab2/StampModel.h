@@ -6,7 +6,8 @@
 #define TESTCMAKE_STAMPMODEL_H
 
 
-#include <QtCore/QString>
+#include <QString>
+#include <QStringList>
 
 class StampModel {
 public:
